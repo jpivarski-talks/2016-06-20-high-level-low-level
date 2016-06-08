@@ -1,0 +1,79 @@
+Bin(100, 0, 80, {mu: Muon => Math.sqrt(mu.px**2 + mu.py**2)}, Count())
+
+===========================================================================
+
+#include <inttypes.h>
+#include <math.h>
+
+uint64_t loop(void *dataBatch, void *storageBatch, int32_t inputBufferFill) {
+
+  uint64_t storagePointer;
+  uint64_t BinningUnwind_0;
+  double BinningQuantity_0;
+  int32_t BinningBin_0;
+
+  for (int32_t rowIndex = 0;  rowIndex < inputBufferFill;  ++rowIndex) {
+    storagePointer = (uint64_t)storageBatch;
+    // Binning unwind-protect
+    BinningUnwind_0 = storagePointer;
+    BinningQuantity_0 = (*((double*)(dataBatch + 0 + rowIndex*8)));
+    if (BinningQuantity_0 != BinningQuantity_0) {
+      // Binning.nanflow
+      storagePointer += 816;
+      // Counting.entries without weight
+      ++(*((int32_t*)storagePointer));
+      storagePointer += 8;
+    }
+    else {
+      BinningBin_0 = (int32_t)floor(100 * (BinningQuantity_0 - 0.0) * 0.0125);
+      if (BinningQuantity_0 == -INFINITY  ||  BinningBin_0 < 0) {
+        // Binning.underflow
+        storagePointer += 800;
+        // Counting.entries without weight
+        ++(*((int32_t*)storagePointer));
+        storagePointer += 8;
+      }
+      else if (BinningQuantity_0 == INFINITY  ||  BinningBin_0 >= 100) {
+        // Binning.overflow
+        storagePointer += 808;
+        // Counting.entries without weight
+        ++(*((int32_t*)storagePointer));
+        storagePointer += 8;
+      }
+      else {
+        // Binning.value
+        storagePointer += BinningBin_0 * 8;
+        // Counting.entries without weight
+        ++(*((int32_t*)storagePointer));
+        storagePointer += 8;
+      }
+    }
+    storagePointer = BinningUnwind_0 + 824;
+    // Binning.entries without weight
+    ++(*((int32_t*)storagePointer));
+    storagePointer += 8;
+  }
+
+  return 0;
+
+}
+
+===========================================================================
+
+Compare only the filling code (after physics quantities like pT have already been calculated), ROOT equivalent is:
+
+  for (int i = 0;  i < SIZE;  ++i) {
+    h->Fill(dataset[i]);
+  }
+
+and
+
+  for (int i = 0;  i < SIZE;  ++i) {
+    h->Fill(dataset[i]);
+    h->Fill(dataset[i]);
+    h->Fill(dataset[i]);
+    ...
+  }
+
+  1 histogram,  10000000 entries: 0.81 sec vs 13 sec      43 clock ticks/entry in tcc,    12 clock ticks/entry in Cling    ROOT equivalent is   32 clock ticks/entry
+100 histograms,   100000 entries: 0.75 sec vs 27 sec    5500 clock ticks/entry in tcc,   620 clock ticks/entry in Cling    ROOT equivalent is 3000 clock ticks/entry
