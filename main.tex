@@ -271,6 +271,67 @@ val cosxOrNone = numberOrNone.map(cos(_))
 \end{frame}
 
 \begin{frame}{Optimizations via CSS-style selectors}
+\vfill
+High-level code is frustrating when it {\it takes away} the ability to manually optimize.
+
+\vfill
+The point is not to make the physicist unaware of the low-level details, just to remove the necessity of thinking about both at the same time.
+
+\vfill
+\uncover<2>{(You don't think about QCD while studying atomic structure, but that doesn't mean you can't know about QCD!)}
+\end{frame}
+
+\begin{frame}[fragile]{Optimizations via CSS-style selectors}
+\vfill
+Take a hint from HTML+CSS, which separates structure from style by putting them in two separate files:
+
+\begin{columns}
+\column{0.55\linewidth}
+\begin{lstlisting}[language=html, basicstyle=\ttfamily\scriptsize]
+<html>
+  <body>
+    <ul id="bulleted-list">
+      <li class="first">one</li>
+      <li class="rest">two</li>
+      <li class="rest">three</li>
+    </ul>
+    <ol>
+      <li>unaffected</li>
+    </ol>
+  </body>
+</html>
+\end{lstlisting}
+
+\column{0.4\linewidth}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+#id { border: solid 1px red; }
+
+ul li { color: blue; }
+
+li.first { font-weight: bold; }
+
+.rest { text-decoration: underline; }
+\end{lstlisting}
+\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Optimizations via CSS-style selectors}
+\vfill
+Consider a variant of CSS selectors that pick program elements and apply optimization hints:
+
+\begin{columns}
+\column{0.55\linewidth}
+\begin{lstlisting}[language=python, basicstyle=\ttfamily\scriptsize]
+def function(x: (0, inf),
+             xs: array([0, inf], ())):
+    pass
+\end{lstlisting}
+
+\column{0.4\linewidth}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+hey
+\end{lstlisting}
+\end{columns}
 \end{frame}
 
 \begin{frame}{Imperative idioms through patterns}
