@@ -86,7 +86,7 @@ This talk is about a future project I'm working toward.
 \vfill
 \begin{block}{Goals:}
 \begin{itemize}
-\item to increase the separation between the physics-relevant concepts and low-level computing details
+\item to increase the separation between physics-relevant concepts and low-level computing details
 \item without sacrificing computational performance; in most cases, improving it.
 \end{itemize}
 \end{block}
@@ -113,7 +113,7 @@ Even in industry,
 \includegraphics[width=\linewidth]{space-of-programs.png}
 
 \column{0.3\linewidth}
-Most programming languages fill the ``space of all possible programs'' because they're Turing complete.
+All programming languages fill the ``space of possible programs'' because they're Turing complete.
 
 \vspace{0.25 cm}
 However, different languages are like different metrics on this space.
@@ -197,7 +197,6 @@ A well-designed DSL can encourage exploration of the problem space (physics) whi
 \vfill
 I plan to design a domain specific language for end-user physics analysis scripts with the following properties:
 
-\vspace{0.2 cm}
 \begin{itemize}
 \item a subset of or based on Python syntax
 \item non-exclusive: mix with normal (slow) Python
@@ -208,7 +207,13 @@ I plan to design a domain specific language for end-user physics analysis script
 \end{itemize}
 
 \vfill
-Histogrammar, my histogram-aggregation tool, is a step toward this, which I'm using to test components of the larger-scope project.
+\uncover<2->{\textcolor{darkblue}{Scope:} only the data manipulation, not whole applications}
+
+\vspace{0.1 cm}
+\uncover<3->{\textcolor{darkblue}{Backends:} convert to C, CUDA/OpenCL, or Verilog/HDL for a traditional compiler to compile (``{\it transpiling} to C'')}
+
+\vspace{0.1 cm}
+\uncover<4->{\textcolor{darkblue}{Stepping stone:} Histogrammar, my histogram-aggregation DSL, is being used to test some of the basic ideas.}
 \end{frame}
 
 \begin{frame}{Immutable, maybe total-functional}
@@ -263,7 +268,7 @@ val cosxOrNone = numberOrNone.map(cos(_))
 \begin{itemize}
 \item<4-> This is like an extreme form of {\tt \small int} versus {\tt \small unsigned int}.
 \item<4-> Useful feedback to the data analyst: ``Why does my function output have such a large range?''
-\item<4-> Could even be used to set bit widths for a FPGA backend.
+\item<4-> Could even be used to set bit widths for an FPGA backend.
 \item<4-> I have implemented this for $+$, $-$, $*$, $/$, $**$, and modular arithmetic with 6k lines of unit tests. Extending to continuous functions will involve searches for inflection points.
 \end{itemize}
 \item<5-> Inference only: intervals specified on input arguments, everything else inferred. The compiler should be telling the user what the domains are, not the other way around. (Being purely functional helps this.)
@@ -317,24 +322,219 @@ li.first { font-weight: bold; }
 
 \begin{frame}[fragile]{Optimizations via CSS-style selectors}
 \vfill
-Consider a variant of CSS selectors that pick program elements and apply optimization hints:
+Consider a variant of CSS selectors that picks program elements and applies optimization hints:
 
 \begin{columns}
-\column{0.55\linewidth}
+\column{0.5\linewidth}
 \begin{lstlisting}[language=python, basicstyle=\ttfamily\scriptsize]
-def function(x: (0, inf),
-             xs: array([0, inf], ())):
-    pass
+# type declarations as Python3 argument decorations
+def doWeirdStuff(
+      x: [-10, 10],
+      xs: list(size=[1, inf],
+               data=[-5, 5])):
+
+    # function body
+    xs2 = xs.appended(xs[0])
+
+    return xs2.appended(x / 2)
 \end{lstlisting}
 
-\column{0.4\linewidth}
-\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
-hey
+\column{0.55\linewidth}
+\begin{lstlisting}[language=c, basicstyle=\ttfamily\scriptsize]
+/* only affects x in doWeirdStuff, not other functions */
+doWeirdStuff x {
+  data-type: signed char;
+}
+
+/* implies that xs2 is also a mutable linked list */
+xs {
+  data-type: mutable linked list;
+  storage: contiguous obstack;
+}
 \end{lstlisting}
 \end{columns}
+
+\vfill
+\hfill \textcolor{gray}{Status: not deeply thought-through yet.}
 \end{frame}
 
 \begin{frame}{Imperative idioms through patterns}
+\begin{block}{Problem with Python}
+Large-scale syntax isn't suited for functional programming:
+\begin{itemize}
+\item control in statements, not expressions
+\item cannot put statements in lambda functions
+\end{itemize}
+\end{block}
+
+\vspace{0.25 cm}
+\begin{block}{Problem with anything else}
+Unfamiliar to physicists: Yet Another Syntax!
+
+\vspace{0.3 cm}
+Besides, Python's expression syntax is excellent, want to keep that.
+\end{block}
 \end{frame}
 
+\begin{frame}[fragile]{Imperative idioms through patterns}
+\only<2>{\vfill\vfill}
+\vfill
+\begin{columns}
+\column{0.5\linewidth}
+Imperative code, the way Python was meant to be used:
+
+\begin{lstlisting}[language=python, basicstyle=\ttfamily\scriptsize]
+def function(x: (-inf, inf)):
+    if x > 0:
+        y = 1
+    elif x < 0:
+        y = -1
+    else:
+        y = 0
+
+    tenOfThem = []
+    for i in range(10):
+        tenOfThem.append(y)
+    return tenOfThem
+\end{lstlisting}
+
+\column{0.5\linewidth}
+Functional code, the way I'd want to use it:
+
+\begin{lstlisting}[language=python, basicstyle=\ttfamily\scriptsize]
+def function(x: (-inf, inf)):
+    y =  1 if x > 0 else
+        -1 if x < 0 else
+         0
+
+    tenOfThem = range(10) \
+        .map(lambda i: y)
+
+    return tenOfThem
+
+
+
+\end{lstlisting}
+\end{columns}
+
+\vfill
+\begin{onlyenv}<1>
+I have to think backward to read the one on the right.
+\end{onlyenv}
+\begin{onlyenv}<2>
+But suppose the left is recognized as ``idioms'' and translated?
+\begin{itemize}
+\item {\tt \small if} statements where every branch defines the same symbol
+\item {\tt \small for} loops that only append to a list
+\end{itemize}
+\end{onlyenv}
+\end{frame}
+
+\begin{frame}[fragile]{Transpiling in Histogrammar}
+\vfill
+Histogrammar is a DSL with a much smaller scope (making histograms in distributed systems).
+
+\vfill
+Deeply nested structure is a nice abstraction, but it's surely slower than filling an array.
+
+\begin{lstlisting}[language=python, basicstyle=\ttfamily\scriptsize]
+directory_of_histograms =
+    Label(
+        one = Select(lambda d: d.trigger > 5,
+                  Bin(100, 0, 80, lambda d: d.pt, Count())),
+        two = Select(lambda d: d.pt > 30,
+                  Bin(100, 0, 120, lambda d: d.met, Count()))
+    )
+\end{lstlisting}
+
+\vfill
+\textcolor{blue}{\small \url{http://github.com/diana-hep/histogrammar/scala-jit}}
+
+implements just-in-time C compilation: transpiles the histogram structure into explicit C code, compiles it, and runs it.
+\end{frame}
+
+\begin{frame}[fragile]{Transpiling in Histogrammar}
+\vspace{0.3 cm}
+Auto-generated C code operates on batches of data, batches of histograms, by casting pointers in a contiguous malloc block.
+
+\vfill
+\begin{lstlisting}[language=c, basicstyle=\ttfamily\tiny]
+#include <inttypes.h>
+#include <math.h>
+
+uint64_t loop(void *dataBatch, void *storageBatch, int32_t inputBufferFill) {
+  uint64_t storagePointer;
+  uint64_t BinningUnwind_0;
+  double BinningQuantity_0;
+  int32_t BinningBin_0;
+  for (int32_t rowIndex = 0;  rowIndex < inputBufferFill;  ++rowIndex) {
+    storagePointer = (uint64_t)storageBatch;
+    // Binning unwind-protect
+    BinningUnwind_0 = storagePointer;
+    BinningQuantity_0 = (*((double*)(dataBatch + 0 + rowIndex*8)));
+    if (BinningQuantity_0 != BinningQuantity_0) {
+      // Binning.nanflow
+      storagePointer += 816;
+      // Counting.entries without weight
+      ++(*((int32_t*)storagePointer));
+      storagePointer += 8;
+    }
+    else {
+      BinningBin_0 = (int32_t)floor(100 * (BinningQuantity_0 - 0.0) * 0.0125);
+      if (BinningQuantity_0 == -INFINITY  ||  BinningBin_0 < 0) {
+        // Binning.underflow
+        storagePointer += 800;
+        // Counting.entries without weight
+        ++(*((int32_t*)storagePointer));
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Transpiling in Histogrammar}
+\renewcommand{\arraystretch}{1.2}
+\vfill
+\vfill
+The whole workflow (calculating data in Scala, copying to off-heap, filling histograms, bringing back results):
+
+\begin{center}
+\begin{tabular}{r r c c}
+\#histograms & \#entries & naive Scala & JIT C \\\hline
+1 & 10,000,000 & 13 seconds & 0.81 seconds \\
+100 & 100,000 & 27 seconds & 0.75 seconds \\
+\end{tabular}
+\end{center}
+
+\vfill
+Just the tight loop around filling (pull data from an array):
+
+\begin{center}
+\begin{tabular}{r r c c}
+\#histograms & \#entries & JIT C & ROOT \\\hline
+1 & 10,000,000 & 12 clock-ticks & 32 clock-ticks \\
+100 & 100,000 & 620 clock-ticks & 3000 clock-ticks \\
+\end{tabular}
+\end{center}
+
+\textcolor{gray}{JIT C reproduced ROOT timings when placed in a function call (``{\tt \small hist->Fill(...)}''). We're scraping the bottom of the barrel!}
+\end{frame}
+
+\begin{frame}{Recap}
+High-level abstractions are not inconsistent with computational performance when the problem domain is sufficiently restricted.
+
+\vfill
+I'm planning to expand my current work from histogramming abstractions to a domain specific language for physics analysis \mbox{that is:}
+\begin{itemize}
+\item familiar enough to be used by physicists
+\item designed around the specific needs of physics analysis
+\item transpiled to highly performant code.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Greg Owen's talk on Spark 2.0}
+\vspace{1 cm}
+\only<1>{\includegraphics[width=\linewidth]{greg-owen/page1.png}}
+\only<2>{\includegraphics[width=\linewidth]{greg-owen/page2.png}}
+\only<3>{\includegraphics[width=\linewidth]{greg-owen/page3.png}}
+\only<4>{\includegraphics[width=\linewidth]{greg-owen/page4.png}}
+\only<5>{\includegraphics[width=\linewidth]{greg-owen/page5.png}}
+\end{frame}
 \end{document}
