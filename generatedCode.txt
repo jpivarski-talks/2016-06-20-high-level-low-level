@@ -76,4 +76,5 @@ and
   }
 
   1 histogram,  10000000 entries: 0.81 sec vs 13 sec      43 clock ticks/entry in tcc,    12 clock ticks/entry in Cling    ROOT equivalent is   32 clock ticks/entry
+
 100 histograms,   100000 entries: 0.75 sec vs 27 sec    5500 clock ticks/entry in tcc,   620 clock ticks/entry in Cling    ROOT equivalent is 3000 clock ticks/entry

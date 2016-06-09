@@ -79,95 +79,201 @@
 %  \tableofcontents
 %\end{frame}
 
-\section{Introduction}
+\begin{frame}{}
+\vfill
+This talk is about a future project I'm working toward.
 
-\begin{frame}{Introduction}
-
+\vfill
+\begin{block}{Goals:}
 \begin{itemize}
-  \item Your introduction goes here!
-  \item Use \texttt{itemize} to organize your main points.
+\item to increase the separation between the physics-relevant concepts and low-level computing details
+\item without sacrificing computational performance; in most cases, improving it.
 \end{itemize}
-
-\vskip 1cm
-
-\begin{block}{Examples}
-Some examples of commonly used commands and features are included, to help you get started.
 \end{block}
-
 \end{frame}
 
-\section{Some \LaTeX{} Examples}
+\begin{frame}{}
+\vfill
+This talk is about programming languages because languages {\it are the user interface} of data analysis.
 
-\subsection{Tables and Figures}
-
-\begin{frame}{Tables and Figures}
-
+\vfill
+Even in industry,
 \begin{itemize}
-\item Use \texttt{tabular} for basic tables --- see Table~\ref{tab:widgets}, for example.
-\item You can upload a figure (JPEG, PNG or PDF) using the files menu. 
-\item To include it in your document, use the \texttt{includegraphics} command (see the comment below in the source code).
+\item business intelligence speaks SQL,
+\item statisticians speak R and SAS,
+\item financial analysts write extensive Excel macros\ldots
 \end{itemize}
-
-% Commands to include a figure:
-%\begin{figure}
-%\includegraphics[width=\textwidth]{your-figure's-file-name}
-%\caption{\label{fig:your-figure}Caption goes here.}
-%\end{figure}
-
-\begin{table}
-\centering
-\begin{tabular}{l|r}
-Item & Quantity \\\hline
-Widgets & 42 \\
-Gadgets & 13
-\end{tabular}
-\caption{\label{tab:widgets}An example table.}
-\end{table}
-
 \end{frame}
 
-\subsection{Mathematics}
-
-\begin{frame}{Readable Mathematics}
-
-Let $X_1, X_2, \ldots, X_n$ be a sequence of independent and identically distributed random variables with $\text{E}[X_i] = \mu$ and $\text{Var}[X_i] = \sigma^2 < \infty$, and let
-$$S_n = \frac{X_1 + X_2 + \cdots + X_n}{n}
-      = \frac{1}{n}\sum_{i}^{n} X_i$$
-denote their mean. Then as $n$ approaches infinity, the random variables $\sqrt{n}(S_n - \mu)$ converge in distribution to a normal $\mathcal{N}(0, \sigma^2)$.
-
-\end{frame}
-
-\subsection{Code}
-
-\begin{frame}[fragile]{Readable Code}
+\begin{frame}{The choice of language matters}
 
 \vspace{0.5 cm}
+\begin{columns}
+\column{0.7\linewidth}
+\includegraphics[width=\linewidth]{space-of-programs.png}
 
-Remember to mark the frame as ``fragile'' for verbatim.
+\column{0.3\linewidth}
+Most programming languages fill the ``space of all possible programs'' because they're Turing complete.
 
-\begin{lstlisting}[language=c, frame=single]
-auto output = std::vector<Result>();
-for (i = 0;  i < nEvents;  i++) {   // C++ code!
-    event = events(i);
-    if (condition(event))
-        continue;
-    output.push_back(calculation(event));
+\vspace{0.25 cm}
+However, different languages are like different metrics on this space.
+
+\vspace{0.25 cm}
+A small change in one is a big change in another.
+\end{columns}
+\end{frame}
+
+\begin{frame}{Evolution of language choice}
+\vspace{0.5 cm}
+\begin{block}{High energy physics}
+Decades of Fortran, transitioned to C++ in late '90s, may be leaning towards Python now.
+\end{block}
+
+\begin{block}{Data science in industry}
+Big Data/Hadoop grew out of web development: distributed systems in Java.
+
+\vspace{0.25 cm}
+Now involves more machine learning and statistics, so shift toward Scala on the JVM, Python for Scikit-Learn, and R.
+\end{block}
+
+\vspace{0.5 cm}
+\includegraphics[width=\linewidth]{languages1.pdf}
+\end{frame}
+
+\begin{frame}{Abstractions {\it versus} performance?}
+\vspace{0.5 cm}
+Experience tells us that low-level is fast and high-level is slow.
+
+\vspace{0.5 cm}
+\includegraphics[width=\linewidth]{benchmark-games.png}
+\end{frame}
+
+\begin{frame}{Domain-Specific Languages (DSLs)}
+
+\vspace{0.5 cm}
+\begin{columns}
+\column{0.7\linewidth}
+\includegraphics[width=\linewidth]{space-of-programs-glove.png}
+
+\column{0.4\linewidth}
+But it doesn't have to be: intentionally restricting the scope of the language allows more optimization.
+
+\vspace{0.25 cm}
+\textcolor{darkblue}{Prime example: SQL.}
+
+\vspace{0.25 cm}
+But also:
+\begin{itemize}
+\item Fortran's lack of (aliasable) pointers
+\item regular expressions for string manipulation
+\item Numpy in Python
+\item Histogrammar\ldots
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{More accurate statement}
+
+\vfill
+High-level abstractions $+$ complete generality is slow.
+
+\vfill
+High-level abstractions $+$ restricted domain
+\begin{itemize}
+\item can be as fast as a custom-tuned program,
+\item but with better separation of domain knowledge from computing details.
+\end{itemize}
+
+\vfill
+\begin{uncoverenv}<2>
+A well-designed DSL can encourage exploration of the problem space (physics) while a backend optimizes performance.
+
+\vspace{0.25 cm}
+(A poorly designed DSL can make it impossible to get work done!)
+\end{uncoverenv}
+\end{frame}
+
+\begin{frame}{Goals for my future project}
+\vfill
+I plan to design a domain specific language for end-user physics analysis scripts with the following properties:
+
+\vspace{0.2 cm}
+\begin{itemize}
+\item a subset of or based on Python syntax
+\item non-exclusive: mix with normal (slow) Python
+\item immutable, maybe total-functional (next slide)
+\item very strongly typed, but only through inference (next$^2$ slide)
+\item manual optimizations via CSS-style selectors (next$^3$ slide)
+\item supporting imperative idioms through patterns (next$^4$ slide)
+\end{itemize}
+
+\vfill
+Histogrammar, my histogram-aggregation tool, is a step toward this, which I'm using to test components of the larger-scope project.
+\end{frame}
+
+\begin{frame}{Immutable, maybe total-functional}
+\vfill
+``Functional programming'' eliminates mutable program state:
+\begin{itemize}
+\item output of functions depend strictly on their inputs
+\item {\tt \small x = x + 1} is a false mathematical statement
+\item assignments form a time-independent graph, may be written in any order and backend may execute in any order
+\item backend may substitute mutable data structures by analyzing (or temporally rearranging) the assignment graph
+\item good for concurrency (no locks)
+\end{itemize}
+
+\vfill
+\begin{uncoverenv}<2->
+``Total functional programming'' also eliminates unbounded loops and exceptions:
+\begin{itemize}
+\item programs are known to halt (not Turing complete), maybe even with time estimates
+\item exactly model mathematical functions: $f: \mathcal{D} \to \mathcal{R}$
+\end{itemize}
+\end{uncoverenv}
+\end{frame}
+
+\begin{frame}[fragile]{Strongly typed through inference}
+\vfill
+Type check is a formal proof that program is free of certain errors.
+
+\vfill
+Scala example (eliminates runtime null pointer exceptions):
+\begin{lstlisting}[language=scala]
+val numberOrNone: Option[Double] = Some(3.14)
+val cosx = numberOrNone match {
+  case Some(x) => cos(x)
+  case None => -999.0
 }
-\end{lstlisting}
 
-\begin{lstlisting}[language=python, frame=single]
-output = []                         # Python code!
-for event in events:
-    if condition(event):
-        continue
-    output.append(calculation(event))
-\end{lstlisting}
+// or better
+val cosxOrNone = numberOrNone.map(cos(_))
 
-\begin{lstlisting}[language=scala, frame=single]
-val output: Seq[Result] =           // Scala code!
-  events.filter(condition).map(calculation)
+// but cos(numberOrNone) would be a compiler error
 \end{lstlisting}
+\end{frame}
 
+\begin{frame}{Strongly typed through inference}
+\vspace{0.3 cm}
+\begin{itemize}
+\item<1-> {\tt \small numberOrNone} is a value from the set $\Bbb{R} \cup \{\mbox{\tt \small None}\}$.
+
+\item<2-> One could catch division-by-zero errors in the same way by considering sets like $\Bbb{R} \cup \{-\infty, \infty\}$.
+
+\item<3-> For physics applications, it could be useful to consider any interval, like $(-3, 8] \cap \Bbb{Z}$ or $[0, \infty)$, as ``data types.''
+\begin{itemize}
+\item<4-> This is like an extreme form of {\tt \small int} versus {\tt \small signed int}.
+\item<4-> Useful feedback to the data analyst: ``Why does my function output have such a large range?''
+\item<4-> Could even be used to set bit widths for a FPGA backend.
+\item<4-> I have implemented this for $+$, $-$, $*$, $/$, $**$, and modular arithmetic with 6k lines of unit tests. Extending to continuous functions will involve searches for inflection points.
+\end{itemize}
+\item<5-> Inference only: intervals specified on input arguments, everything else inferred. The compiler should be telling the user what the domains are, not the other way around. (Being purely functional helps this.)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Optimizations via CSS-style selectors}
+\end{frame}
+
+\begin{frame}{Imperative idioms through patterns}
 \end{frame}
 
 \end{document}
