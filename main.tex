@@ -180,13 +180,13 @@ High-level abstractions $+$ complete generality is slow.
 \vfill
 High-level abstractions $+$ restricted domain
 \begin{itemize}
-\item can be as fast as a custom-tuned program,
+\item can be as fast as a custom-tuned program \mbox{(especially with JIT),\hspace{-1 cm}}
 \item but with better separation of domain knowledge from computing details.
 \end{itemize}
 
 \vfill
 \begin{uncoverenv}<2>
-A well-designed DSL can encourage exploration of the problem space (physics) while a backend optimizes performance.
+A well-designed DSL can encourage exploration of the problem space (physics) while the backend optimizes performance.
 
 \vspace{0.25 cm}
 (A poorly designed DSL can make it impossible to get work done!)
@@ -261,7 +261,7 @@ val cosxOrNone = numberOrNone.map(cos(_))
 
 \item<3-> For physics applications, it could be useful to consider any interval, like $(-3, 8] \cap \Bbb{Z}$ or $[0, \infty)$, as ``data types.''
 \begin{itemize}
-\item<4-> This is like an extreme form of {\tt \small int} versus {\tt \small signed int}.
+\item<4-> This is like an extreme form of {\tt \small int} versus {\tt \small unsigned int}.
 \item<4-> Useful feedback to the data analyst: ``Why does my function output have such a large range?''
 \item<4-> Could even be used to set bit widths for a FPGA backend.
 \item<4-> I have implemented this for $+$, $-$, $*$, $/$, $**$, and modular arithmetic with 6k lines of unit tests. Extending to continuous functions will involve searches for inflection points.
