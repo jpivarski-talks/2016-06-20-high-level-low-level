@@ -97,7 +97,7 @@ This talk is about a future project I'm working toward.
 This talk is about programming languages because languages {\it are the user interface} of data analysis.
 
 \vfill
-Even in industry,
+The same is true in industry:
 \begin{itemize}
 \item business intelligence speaks SQL,
 \item statisticians speak R and SAS,
@@ -146,6 +146,8 @@ Experience tells us that low-level is fast and high-level is slow.
 
 \vspace{0.5 cm}
 \includegraphics[width=\linewidth]{benchmark-games.png}
+
+\hfill \textcolor{blue}{\small \url{http://benchmarksgame.alioth.debian.org/}}
 \end{frame}
 
 \begin{frame}{Domain-Specific Languages (DSLs)}
@@ -283,15 +285,18 @@ High-level code is frustrating when it {\it takes away} the ability to manually 
 The point is not to make the physicist unaware of the low-level details, just to remove the necessity of thinking about both at the same time.
 
 \vfill
-\uncover<2>{(You don't think about QCD while studying atomic structure, but that doesn't mean you can't know about QCD!)}
+\uncover<2>{(You don't have to think about nuclear physics when studying atomic structure, but that doesn't mean you can't {\it know about} nuclear physics!)}
 \end{frame}
 
 \begin{frame}[fragile]{Optimizations via CSS-style selectors}
 \vfill
 Take a hint from HTML+CSS, which separates structure from style by putting them in two separate files:
 
-\begin{columns}
+\vspace{0.25 cm}
+\begin{columns}[T]
 \column{0.55\linewidth}
+{\bf \small HTML file}
+
 \begin{lstlisting}[language=html, basicstyle=\ttfamily\scriptsize]
 <html>
   <body>
@@ -308,6 +313,8 @@ Take a hint from HTML+CSS, which separates structure from style by putting them 
 \end{lstlisting}
 
 \column{0.4\linewidth}
+{\bf \small CSS file}
+
 \begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
 #id { border: solid 1px red; }
 
@@ -324,8 +331,11 @@ li.first { font-weight: bold; }
 \vfill
 Consider a variant of CSS selectors that picks program elements and applies optimization hints:
 
-\begin{columns}
+\vspace{0.25 cm}
+\begin{columns}[T]
 \column{0.5\linewidth}
+{\bf \small Correctness}
+
 \begin{lstlisting}[language=python, basicstyle=\ttfamily\scriptsize]
 # type declarations as Python3 argument decorations
 def doWeirdStuff(
@@ -340,6 +350,8 @@ def doWeirdStuff(
 \end{lstlisting}
 
 \column{0.55\linewidth}
+{\bf \small Performance}
+
 \begin{lstlisting}[language=c, basicstyle=\ttfamily\scriptsize]
 /* only affects x in doWeirdStuff, not other functions */
 doWeirdStuff x {
@@ -369,7 +381,7 @@ Large-scale syntax isn't suited for functional programming:
 
 \vspace{0.25 cm}
 \begin{block}{Problem with anything else}
-Unfamiliar to physicists: Yet Another Syntax!
+Unfamiliar to physicists: yet another language!
 
 \vspace{0.3 cm}
 Besides, Python's expression syntax is excellent, want to keep that.
@@ -419,7 +431,7 @@ def function(x: (-inf, inf)):
 
 \vfill
 \begin{onlyenv}<1>
-I have to think backward to read the one on the right.
+I have to think backwards to read the one on the right.
 \end{onlyenv}
 \begin{onlyenv}<2>
 But suppose the left is recognized as ``idioms'' and translated?
@@ -448,9 +460,13 @@ directory_of_histograms =
 \end{lstlisting}
 
 \vfill
+\begin{uncoverenv}<2->
+{\bf Transparent speed-up: JIT compilation}
+
 \textcolor{blue}{\small \url{http://github.com/diana-hep/histogrammar/scala-jit}}
 
-implements just-in-time C compilation: transpiles the histogram structure into explicit C code, compiles it, and runs it.
+transpiles the histogram structure into explicit C code, compiles it, and runs it.
+\end{uncoverenv}
 \end{frame}
 
 \begin{frame}[fragile]{Transpiling in Histogrammar}
@@ -504,17 +520,15 @@ The whole workflow (calculating data in Scala, copying to off-heap, filling hist
 \end{center}
 
 \vfill
-Just the tight loop around filling (pull data from an array):
+Just the tight loop around filling (pull data from an array) and using cling instead of tcc:
 
 \begin{center}
 \begin{tabular}{r r c c}
 \#histograms & \#entries & JIT C & ROOT \\\hline
-1 & 10,000,000 & 12 clock-ticks & 32 clock-ticks \\
-100 & 100,000 & 620 clock-ticks & 3000 clock-ticks \\
+1 & 100,000,000 & 0.74 seconds & 2.2 seconds \\
+100 & 1,000,000 & 0.44 seconds & 2.2 seconds \\
 \end{tabular}
 \end{center}
-
-\textcolor{gray}{JIT C reproduced ROOT timings when placed in a function call (``{\tt \small hist->Fill(...)}''). We're scraping the bottom of the barrel!}
 \end{frame}
 
 \begin{frame}{Recap}
